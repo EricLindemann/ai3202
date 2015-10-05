@@ -123,30 +123,78 @@ def bestReward(graph,x,y,eps):
     else:
         valueAbove = eps
 
-    finalAbove = (.8*valueAbove + .1*valueLeft + .1*valueRight)
-    finalBelow = (.8*valueBelow + .1*valueLeft + .1*valueRight)
-    finalLeft = (.8*valueLeft + .1*valueAbove + .1*valueBelow)
-    finalRight = (.8*valueRight + .1*valueAbove + .1*valueBelow)
+    finalAbove = .9*(.8*valueAbove + .1*valueLeft + .1*valueRight)
+    finalBelow = .9*(.8*valueBelow + .1*valueLeft + .1*valueRight)
+    finalLeft = .9*(.8*valueLeft + .1*valueAbove + .1*valueBelow)
+    finalRight = .9*(.8*valueRight + .1*valueAbove + .1*valueBelow)
     if finalAbove > finalBelow and finalAbove > finalRight and finalAbove > finalLeft:
-        return [node,'up',finalAbove]
+        if node > 10:    
+            if graph.getWeight(node-10,node) != None:
+                return ['up',graph.getWeight(node-10,node)+finalAbove]
+            else:
+                return['up',finalAbove]
+        elif graph.getWeight(node+10,node) != None:
+            return ['up',graph.getWeight(node+10,node)+finalAbove]
+        else:
+            return['up',finalAbove]
     elif finalBelow > finalLeft and finalBelow > finalRight:
-        return [node,'down', finalBelow]
+        if node < 70:    
+            if graph.getWeight(node+10,node) != None:
+                return ['down', graph.getWeight(node+10,node)+finalBelow]
+            else:
+                return['down',finalBelow]
+        elif graph.getWeight(node-10,node) != None:
+            return ['down', graph.getWeight(node-10,node)+finalBelow]
+        else:
+            return['down',finalBelow]
     elif finalLeft > finalRight:
-        return [node,'left',finalLeft]
+        if node != 50 and node != 60:
+            if graph.getWeight(node-1,node) != None:
+                return ['left',graph.getWeight(node-1,node)+finalLeft]
+            else:
+                return ['left',finalLeft]
+        elif graph.getWeight(node+1,node) != None:
+            return ['left', graph.getWeight(node+1,node)+finalLeft]
+        else:
+            return['left',finalLeft]
     else:
-        return [node,'right',finalRight]
-
+        if node%10 != 9:
+            if graph.getWeight(node+1,node) != None:
+                return ['right',graph.getWeight(node+1,node)+finalRight]
+            else: 
+                return ['right',finalRight]
+        elif graph.getWeight(node-1,node) != None:
+            return ['right', graph.getWeight(node-1,node)+finalRight]
+        else:
+            return['right',finalRight]
 def valueIteration(graph,eps):
 
-    V = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],]
-    Vprime = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
-    while True:
-        for x in range (0,10):
-            for y in range (0,8):
-                V[y][x] = bestReward(graph,x,y,eps)
-        
-        V[0][9] = [9,"stay",50]
-        return V
+    Vold = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],]
+    Vnew = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
+    for x in range (0,10):
+        for y in range (0,8):
+            Vold[y][x] = bestReward(graph,x,y,eps)
+    delta = 10000
+    for x in range (0,10):
+        for y in range (0,8):
+            while delta > eps*(1-.9)/.9:
+                if Vold[y][x][0] == 'left':
+                    Vnew[y][x] = bestReward(graph,(x-1),y,eps)
+                elif Vold[y][x][0] == 'right':
+                    Vnew[y][x] = bestReward(graph,(x+1),y,eps)
+                elif Vold[y][x][0] == 'up':
+                    Vnew[y][x] = bestReward(graph,x,(y+1),eps)
+                else:
+                    Vnew[y][x] = bestReward(graph,x,(y-1),eps)
+                
+                delta = Vold[y][x][1] - Vnew[y][x][1]
+                
+                Vold[y][x] = Vnew[y][x]
+            
+             
+
+    Vold[0][9] = ["stay",50]
+    return Vold
 
 readInGraph = sys.argv[1]
 eps = sys.argv[2]
@@ -161,7 +209,15 @@ graph = addEdgesToGraph(graph,simpleGraph)
 
 
 V = valueIteration(graph,float(eps))
+print "node (0,0) is bottom left, (0,1) is above that, (1,0) is to the right:"
+i = 7
+j = 0
+for valueRow in V:
+    for value in valueRow:
+        print "(",j,",",i,"):",value
+        j = j + 1
+    i = i - 1
+    j = 0
 
-
-print "Nodes named 0-9 in first row, 10-19 in second, etc.."
-print "[Node name,'direction to go', weight", V
+#print "Nodes named 0-9 in first row, 10-19 in second, etc.."
+#print "[Node name,'direction to go', weight", V
