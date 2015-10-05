@@ -169,26 +169,26 @@ def bestReward(graph,x,y,eps):
             return['right',finalRight]
 def valueIteration(graph,eps):
 
-    Vold = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],]
-    Vnew = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
+    Vold = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
+    Vnew = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
     for x in range (0,10):
         for y in range (0,8):
             Vold[y][x] = bestReward(graph,x,y,eps)
-    delta = 10000
     for x in range (0,10):
         for y in range (0,8):
+            delta = 10000
             while delta > eps*(1-.9)/.9:
-                if Vold[y][x][0] == 'left':
+                if Vold[y][x][0] == 'left' and x > 0:
                     Vnew[y][x] = bestReward(graph,(x-1),y,eps)
-                elif Vold[y][x][0] == 'right':
+                elif Vold[y][x][0] == 'right' and x < 9: 
                     Vnew[y][x] = bestReward(graph,(x+1),y,eps)
-                elif Vold[y][x][0] == 'up':
+                elif Vold[y][x][0] == 'up' and y < 7:
                     Vnew[y][x] = bestReward(graph,x,(y+1),eps)
-                else:
+                elif Vold[y][x][0] == 'down' and y > 0:
                     Vnew[y][x] = bestReward(graph,x,(y-1),eps)
-                
+                else:
+                    Vnew[y][x] = bestReward(graph,x,y,eps)
                 delta = Vold[y][x][1] - Vnew[y][x][1]
-                
                 Vold[y][x] = Vnew[y][x]
             
              
