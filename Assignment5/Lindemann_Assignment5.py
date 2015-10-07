@@ -87,7 +87,7 @@ def addEdgesToGraph(graph,simpleGraph):
     return graph
 
 
-def bestReward(graph,x,y,eps):
+def bestReward(graph,x,y,eps,discount):
     node = y*10 + x
     if (node%10-1) >= 0: #node exists to left
         valueLeft = graph.getWeight(node,node-1)
@@ -123,10 +123,10 @@ def bestReward(graph,x,y,eps):
     else:
         valueAbove = eps
 
-    finalAbove = .9*(.8*valueAbove + .1*valueLeft + .1*valueRight)
-    finalBelow = .9*(.8*valueBelow + .1*valueLeft + .1*valueRight)
-    finalLeft = .9*(.8*valueLeft + .1*valueAbove + .1*valueBelow)
-    finalRight = .9*(.8*valueRight + .1*valueAbove + .1*valueBelow)
+    finalAbove = pow(.9,discount)*(.8*valueAbove + .1*valueLeft + .1*valueRight)
+    finalBelow = pow(.9,discount)*(.8*valueBelow + .1*valueLeft + .1*valueRight)
+    finalLeft = pow(.9,discount)*(.8*valueLeft + .1*valueAbove + .1*valueBelow)
+    finalRight = pow(.9,discount)*(.8*valueRight + .1*valueAbove + .1*valueBelow)
     if finalAbove > finalBelow and finalAbove > finalRight and finalAbove > finalLeft:
         if node > 10:    
             if graph.getWeight(node-10,node) != None:
@@ -173,21 +173,23 @@ def valueIteration(graph,eps):
     Vnew = [[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]]
     for x in range (0,10):
         for y in range (0,8):
-            Vold[y][x] = bestReward(graph,x,y,eps)
+            Vold[y][x] = bestReward(graph,x,y,eps,1)
     for x in range (0,10):
         for y in range (0,8):
             delta = 10000
+            discount = 0
             while delta > eps*(1-.9)/.9:
+                discount = discount + 1
                 if Vold[y][x][0] == 'left' and x > 0:
-                    Vnew[y][x] = bestReward(graph,(x-1),y,eps)
+                    Vnew[y][x] = bestReward(graph,(x-1),y,eps,discount)
                 elif Vold[y][x][0] == 'right' and x < 9: 
-                    Vnew[y][x] = bestReward(graph,(x+1),y,eps)
+                    Vnew[y][x] = bestReward(graph,(x+1),y,eps,discount)
                 elif Vold[y][x][0] == 'up' and y < 7:
-                    Vnew[y][x] = bestReward(graph,x,(y+1),eps)
+                    Vnew[y][x] = bestReward(graph,x,(y+1),eps,discount)
                 elif Vold[y][x][0] == 'down' and y > 0:
-                    Vnew[y][x] = bestReward(graph,x,(y-1),eps)
+                    Vnew[y][x] = bestReward(graph,x,(y-1),eps,discount)
                 else:
-                    Vnew[y][x] = bestReward(graph,x,y,eps)
+                    Vnew[y][x] = bestReward(graph,x,y,eps,discount)
                 delta = Vold[y][x][1] - Vnew[y][x][1]
                 Vold[y][x] = Vnew[y][x]
             
