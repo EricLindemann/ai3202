@@ -1,0 +1,15 @@
+input:
+probabilityType = g-> conditional, j-> joint and m-> marginal
+changesInProbability = S.4,P.3 (sets chance of smoking to .4 and low pollution to .3) None leaves defaults
+whatToUse = P,S,CPS (Pollution, Smoking and Cancer is true)
+Lindemann_Assignment6.py probabilityType changesInProbability whatToUse
+e.g:
+Lindemann_Assignment6.py j P.4 P,S (joint probability of smoking and pollution being low with the probability of low pollution being .4)
+Lindemann_Assignment6.py g None CPS,D (probability of cancer given dyspnoea is true)
+
+working conditionals:
+CPS,D
+CPS,S
+X,S
+D,CPS
+
