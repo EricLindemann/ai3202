@@ -1,0 +1,2 @@
+run with: "python Lindemann_Assignment8.py DATATYPOFILE >> OUTPUTFILE"
+for example: "python Lindemann_Assignment8.py typos20.data >> output.txt"
